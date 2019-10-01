@@ -1,0 +1,35 @@
+mssql:
+  dialect: mssql
+  host: localhost
+  port: 1433
+  name: db_garliava
+  user: sa
+  pass: Nimda63839*
+  # collation: cp1257_lithuanian_ci
+
+mysql:
+  dialect: mysql
+  host: localhost
+  port: 3306
+  name: testas
+  user: dainius
+  pass: nimda
+  # collation: cp1257_lithuanian_ci
+
+source:
+  dialect: mssql
+  host: localhost
+  port: 1433
+  name: db_garliava
+  user: sa
+  pass: Nimda63839*
+  # collation: cp1257_lithuanian_ci
+
+destination:
+  dialect: mysql
+  host: localhost
+  port: 3306
+  name: testas
+  user: dainius
+  pass: nimda
+  # collation: cp1257_lithuanian_ci
