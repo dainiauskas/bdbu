@@ -2,6 +2,8 @@ package models
 
 import (
   "fmt"
+  "strings"
+  // "reflect"
 
   "github.com/jinzhu/gorm"
   "github.com/cheggaaa/pb/v3"
@@ -22,6 +24,7 @@ type Driver interface {
   AddIndexTpl() (string)
   FieldCreateSql(*Propert, string, string) (string)
   AddSysFields([]string) ([]string)
+  SetParams()
 }
 
 func Register(name string, driver Driver) {
@@ -79,9 +82,12 @@ func (db *DB) migrateTable(table *Table) *DB {
   name := table.GetName()
   tmpl := `[{{string . "table_name"}}] [{{string . "action"}}] {{ bar .}} {{counters .}} {{etime .}} {{percent .}}`
 
+  count := table.CountRecords(db.Src)
+
   // start bar based on our template
-  bar := pb.ProgressBarTemplate(tmpl).Start(1)
+  bar := pb.ProgressBarTemplate(tmpl).Start(count)
   defer bar.Finish()
+  defer bar.Set("action", fmt.Sprintf("%-10v", "   done"))
 
   bar.Set("table_name", fmt.Sprintf("%-10v", name))
   db.recreateTable(table, bar)
@@ -89,8 +95,65 @@ func (db *DB) migrateTable(table *Table) *DB {
   bar.Set("action", fmt.Sprintf("%-10v", "indexing"))
   table.AddIndexes(db.Dst)
 
+  if count == 0 {
+    return db
+  }
+
+  bar.Set("action", fmt.Sprintf("%-10v", "inserting"))
+
+  rows, err := db.Src.GetDB().Table(name).Select("*").Rows()
+  if err != nil {
+    panic(err)
+  }
+  defer rows.Close()
+
+  // Get the column names from the query
+  var columns, values []string
+  columns, err = rows.Columns()
+  if err != nil {
+    panic(err)
+  }
+
+  for i, column := range columns {
+    columns[i] = "`" + column + "`"
+    values = append(values, "?")
+  }
+
+  query := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", name,
+    strings.Join(columns, ","), strings.Join(values, ","))
+
+  tx := db.Dst.GetDB().Begin()
+  for rows.Next() {
+    bar.Increment()
+
+    r := make([]interface{}, len(columns))
+    for i := range r {
+      r[i] = &r[i]
+    }
+
+    if err := rows.Scan(r...); err != nil {
+      panic(err)
+    }
+
+    for i, v := range r {
+      switch v.(type) {
+      case string:
+        r[i] = strings.TrimSpace(v.(string))
+      }
+    }
+
+    if err := tx.Exec(query, r...).Error; err != nil {
+      tx.Rollback()
+      fmt.Println(name, err)
+      fmt.Printf("%#v\n", columns)
+      fmt.Printf("%#v\n", r)
+      panic(err)
+    }
+  }
+
   bar.Set("action", fmt.Sprintf("%-10v", "   done"))
-  bar.Increment()
+
+  tx.Commit()
 
   return db
 }
@@ -113,6 +176,9 @@ func (db *DB) GetTableList() []Table {
 // CreateTables create tables by []Table list on destination
 func (db *DB) Migrate() {
   tables := db.GetTableList()
+
+  db.Dst.SetParams()
+
   for _, table := range tables {
     db.migrateTable(&table)
   }

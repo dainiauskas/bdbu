@@ -21,6 +21,10 @@ func init() {
   Register("mssql", ms)
 }
 
+func (ms *MsSql) SetParams() {
+
+}
+
 func (ms *MsSql) Open(url string) {
   db, err := gorm.Open("mssql", url)
   if err != nil {

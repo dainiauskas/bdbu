@@ -60,6 +60,7 @@ func (t *Table) CreateSql(drv Driver, tpl string) string {
   return fmt.Sprintf(tpl, t.GetName(), t.Columns(drv))
 }
 
+// AddIndexes create indexes for table
 func (t *Table) AddIndexes(drv Driver) {
   for _, key := range t.Keys {
     // Checking for primary key, him created with table
@@ -69,4 +70,11 @@ func (t *Table) AddIndexes(drv Driver) {
       }
     }
   }
+}
+
+// CountRecords get rows numbers in table
+func (t *Table) CountRecords(drv Driver) int {
+  var count int
+  drv.GetDB().Table(t.GetName()).Select("*").Count(&count)
+  return count
 }

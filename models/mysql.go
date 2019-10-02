@@ -21,6 +21,10 @@ func init() {
   Register("mysql", my)
 }
 
+func (my *MySql) SetParams() {
+  my.DB.Exec("SET @@sql_mode='';")  
+}
+
 func (my *MySql) Open(url string) {
   db, err := gorm.Open("mysql", url)
   if err != nil {
