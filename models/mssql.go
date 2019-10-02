@@ -1,12 +1,12 @@
 package models
 
 import (
-  _ "github.com/jinzhu/gorm/dialects/mssql"
-  "github.com/jinzhu/gorm"
-  "github.com/cheggaaa/pb/v3"
-  "database/sql"
   "fmt"
+  "database/sql"
   "strings"
+
+  "github.com/jinzhu/gorm"
+  _ "github.com/jinzhu/gorm/dialects/mssql"
 )
 
 type MsSql struct {
@@ -21,9 +21,8 @@ func init() {
   Register("mssql", ms)
 }
 
-func (ms *MsSql) SetParams() {
-
-}
+// Set parameters before migration
+func (ms *MsSql) SetParams() {}
 
 func (ms *MsSql) Open(url string) {
   db, err := gorm.Open("mssql", url)
@@ -138,65 +137,11 @@ func (ms *MsSql) TableRows(name string) (int, *sql.Rows, error) {
   return count, rows, err
 }
 
-func (ms *MsSql) GetTableRows(table Table) {
-  var count int
+func (ms *MsSql) Quote(s string) string {
+  return "[" + s + "]"
+}
 
-  name := table.GetName()
-
-  ms.DB.Table(name).Select("*").Count(&count)
-  if count == 0 {
-    return
-  }
-
-  tmpl := `{{ " Inserting data:" }} [{{string . "table_name"}}] {{ bar .}} {{counters .}} {{etime .}} {{percent .}}`
-
-  bar := pb.ProgressBarTemplate(tmpl).Start(count)
-  bar.Set("table_name", fmt.Sprintf("%-10v", name))
-  defer bar.Finish()
-
-  rows, err := ms.DB.Table(name).Select("*").Rows()
-  if err != nil {
-    panic(err)
-  }
-  defer rows.Close()
-
-  // Get the column names from the query
-  var columns, values []string
-  columns, err = rows.Columns()
-  if err != nil {
-    panic(err)
-  }
-
-  for i, column := range columns {
-    columns[i] = "`" + column + "`"
-    values = append(values, "?")
-  }
-
-  query := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", name,
-    strings.Join(columns, ","), strings.Join(values, ","))
-
-  tx := DBy.Begin()
-
-  for rows.Next() {
-    bar.Increment()
-
-    r := make([]interface{}, len(columns))
-    for i := range r {
-      r[i] = &r[i]
-    }
-
-    if err := rows.Scan(r...); err != nil {
-      panic(err)
-    }
-
-    if err := tx.Exec(query, r...).Error; err != nil {
-      Mytx.Rollback()
-      fmt.Println(name, err)
-      panic(err)
-    }
-  }
-
-  tx.Commit()
-
-  bar.Finish()
+func (ms *MsSql) InsertSql(table string, columns []string, args []string) (string) {
+  return fmt.Sprintf("INSERT INTO [%s] (%s) VALUES (%s)", table,
+    strings.Join(columns, ","), strings.Join(args, ","))
 }

@@ -1,11 +1,11 @@
 package models
 
 import (
-  _ "github.com/jinzhu/gorm/dialects/mysql"
-  "github.com/jinzhu/gorm"
-  // "github.com/cheggaaa/pb/v3"
-  "database/sql"
   "fmt"
+  "strings"
+
+  "github.com/jinzhu/gorm"
+  _ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type MySql struct {
@@ -21,8 +21,9 @@ func init() {
   Register("mysql", my)
 }
 
+// Set parameters before migration
 func (my *MySql) SetParams() {
-  my.DB.Exec("SET @@sql_mode='';")  
+  my.DB.Exec("SET @@sql_mode='';")
 }
 
 func (my *MySql) Open(url string) {
@@ -118,36 +119,6 @@ func (my *MySql) GetTables() ([]Table, error) {
   return tableList, err
 }
 
-// func (my *MySql) CreateTables(tables []Table) error {
-//   tmpl := `{{ "Creating tables:" }} [{{string . "table_name"}}] {{ bar .}} {{counters .}} {{etime .}} {{percent .}}`
-//
-//   // start bar based on our template
-//   bar := pb.ProgressBarTemplate(tmpl).Start(len(tables))
-//   defer bar.Finish()
-//
-//   for _, table := range tables {
-//     bar.Increment()
-//
-//     name := table.GetName()
-//
-//     bar.Set("table_name", fmt.Sprintf("%-10v", name))
-//
-//     my.DB.DropTableIfExists(name)
-//
-//     if err := my.CreateTable(table); err != nil {
-//       return err
-//     }
-//
-//     my.CreateIndexes(&table)
-//     // if err := table.AddIndexes(); err != nil {
-//     //   // fmt.Println(name, err)
-//     //   // return err
-//     // }
-//   }
-//
-//   return nil
-// }
-
 func (my *MySql) CreateIndexes(t *Table) error {
   for _, key := range t.Keys {
     if key.Field != t.RecordId {
@@ -163,22 +134,11 @@ func (my *MySql) CreateIndexes(t *Table) error {
   return nil
 }
 
-func (my *MySql) TableList() []Table {
-  return my.Tables
+func (my *MySql) Quote(s string) string {
+  return "`" + s + "`"
 }
 
-func (my *MySql) GetTableRows(table Table) {
-}
-
-func (my *MySql) MigrateTable(count int, rows *sql.Rows) error {
-  return nil
-}
-
-// CreateTable create table in MySql database
-// func (my *MySql) CreateTable(table Table) error {
-//   return my.Exec(table.CreateSql())
-// }
-
-func (my *MySql) Exec(sql string) error {
-  return my.DB.Exec(sql).Error
+func (my *MySql) InsertSql(table string, columns []string, args []string) (string) {
+  return fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", table,
+    strings.Join(columns, ","), strings.Join(args, ","))
 }

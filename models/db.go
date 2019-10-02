@@ -3,7 +3,6 @@ package models
 import (
   "fmt"
   "strings"
-  // "reflect"
 
   "github.com/jinzhu/gorm"
   "github.com/cheggaaa/pb/v3"
@@ -25,6 +24,8 @@ type Driver interface {
   FieldCreateSql(*Propert, string, string) (string)
   AddSysFields([]string) ([]string)
   SetParams()
+  Quote(string) (string)
+  InsertSql(string, []string, []string) (string)
 }
 
 func Register(name string, driver Driver) {
@@ -100,27 +101,18 @@ func (db *DB) migrateTable(table *Table) *DB {
   }
 
   bar.Set("action", fmt.Sprintf("%-10v", "inserting"))
-  
-  rows, err := db.Src.GetDB().Table(name).Select("*").Rows()
-  if err != nil {
-    panic(err)
-  }
+
+  rows, columns := table.GetRows(db.Src)
   defer rows.Close()
 
   // Get the column names from the query
-  var columns, values []string
-  columns, err = rows.Columns()
-  if err != nil {
-    panic(err)
-  }
-
+  var values []string
   for i, column := range columns {
-    columns[i] = "`" + column + "`"
+    columns[i] = db.Dst.Quote(column)
     values = append(values, "?")
   }
 
-  query := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", name,
-    strings.Join(columns, ","), strings.Join(values, ","))
+  query := db.Dst.InsertSql(name, columns, values)
 
   tx := db.Dst.GetDB().Begin()
   for rows.Next() {
@@ -145,13 +137,9 @@ func (db *DB) migrateTable(table *Table) *DB {
     if err := tx.Exec(query, r...).Error; err != nil {
       tx.Rollback()
       fmt.Println(name, err)
-      fmt.Printf("%#v\n", columns)
-      fmt.Printf("%#v\n", r)
       panic(err)
     }
   }
-
-  bar.Set("action", fmt.Sprintf("%-10v", "   done"))
 
   tx.Commit()
 
@@ -175,9 +163,10 @@ func (db *DB) GetTableList() []Table {
 
 // CreateTables create tables by []Table list on destination
 func (db *DB) Migrate() {
-  tables := db.GetTableList()
-
+  db.Src.SetParams()
   db.Dst.SetParams()
+
+  tables := db.GetTableList()
 
   for _, table := range tables {
     db.migrateTable(&table)

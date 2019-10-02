@@ -3,6 +3,7 @@ package models
 import (
   "strings"
   "fmt"
+  "database/sql"
 )
 
 type Table struct {
@@ -77,4 +78,19 @@ func (t *Table) CountRecords(drv Driver) int {
   var count int
   drv.GetDB().Table(t.GetName()).Select("*").Count(&count)
   return count
+}
+
+// GetRows get rows cursor to table
+func (t *Table) GetRows(drv Driver) (*sql.Rows, []string) {
+  rows, err := drv.GetDB().Table(t.GetName()).Select("*").Rows()
+  if err != nil {
+    panic(err)
+  }
+
+  columns, err := rows.Columns()
+  if err != nil {
+    panic(err)
+  }
+
+  return rows, columns
 }
