@@ -100,7 +100,7 @@ func (db *DB) migrateTable(table *Table) *DB {
   }
 
   bar.Set("action", fmt.Sprintf("%-10v", "inserting"))
-
+  
   rows, err := db.Src.GetDB().Table(name).Select("*").Rows()
   if err != nil {
     panic(err)

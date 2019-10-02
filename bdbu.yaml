@@ -5,7 +5,7 @@ source:
   name: db_garliava
   user: sa
   pass: Nimda63839*
-  collation: cp1257
+  # collation: cp1257
 
 destination:
   dialect: mysql
