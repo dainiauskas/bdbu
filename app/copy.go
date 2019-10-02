@@ -7,30 +7,26 @@ import (
   "bdbu/models"
 )
 
+type duration struct {
+  Start time.Time
+}
+
+func (d *duration) Completed() {
+  fmt.Printf("Completed in %v\n", time.Now().Sub(d.Start))
+}
+
+func NewDuration() *duration {
+  return &duration{
+    Start: time.Now(),
+  }
+}
+
 func Copy() {
-  starting := time.Now()
+  d := NewDuration()
+  defer d.Completed()
 
-  src := models.Connect(Config.Source)
-  defer src.Close()
+  db := models.Connect(Config.Source, Config.Destination)
+  defer db.Close()
 
-  dst := models.Connect(Config.Destination)
-  defer dst.Close()
-
-
-  if err := src.GetTables(); err != nil {
-    panic(err)
-  }
-  fmt.Printf("%+v\n", src.TableList())
-
-  if err := dst.CreateTables(src.TableList()); err != nil {
-    panic(err)
-  }
-
-  for _, table := range src.TableList() {
-    src.GetTableRows(table)
-  }
-
-  ending := time.Now()
-
-  fmt.Printf("Completed in %v\n", ending.Sub(starting))
+  db.Migrate()
 }

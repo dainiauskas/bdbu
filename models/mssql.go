@@ -36,15 +36,80 @@ func (ms *MsSql) Open(url string) {
   ms.DB = db
 }
 
+func (ms *MsSql) GetDB() *gorm.DB {
+  return ms.DB
+}
+
 // Close connection of MsSql database
 func (ms *MsSql) Close() {
   ms.DB.Close()
   fmt.Println("MsSql disconnected")
 }
 
+func (ms *MsSql) CreateTableTpl() string {
+  return "CREATE TABLE `%s` (\n%s\n);"
+}
+
+func (ms *MsSql) AddIndexTpl() string {
+  return "ALTER TABLE `%s` ADD KEY IF NOT EXISTS `%s` (`%s`)"
+}
+
+func (ms *MsSql) FieldCreateSql(p *Propert, primaryKey, relKey string) string {
+  return "[" + p.GetField() + "]" + " " + ms.dbfToSqlType(p, primaryKey, relKey)
+}
+
+func (ms *MsSql) dbfToSqlType(p *Propert, primaryKey, relKey string) string {
+  var null string
+
+  if p.Field == primaryKey {
+    null = "NOT NULL PRIMARY KEY"
+  } else if p.Field == relKey {
+    null = "NOT NULL UNIQUE"
+  } else if p.ColNull == 0 {
+    null = "NOT NULL"
+  } else {
+    null = "DEFAULT NULL"
+  }
+
+  switch p.Type {
+  case "I":
+    return fmt.Sprintf("INT %s", p.Size, null)
+  case "C":
+    return fmt.Sprintf("CHAR(%d) %s", p.Size, null)
+  case "N":
+    return fmt.Sprintf("DECIMAL(%d,%d) %s", p.Size, p.Decimals, null)
+  case "M":
+    return fmt.Sprintf("TEXT")
+  case "D":
+    return fmt.Sprintf("DATE %s", null)
+  case "T":
+    return fmt.Sprintf("DATETIME %s", null)
+  }
+
+  return ""
+}
+
+// AddSysFields adding system fields to columns list for creating table
+func (ms *MsSql) AddSysFields(list []string) []string {
+  list = append(list, "[inp_time] datetime DEFAULT NULL")
+  list = append(list, "[inp_user] int(11) DEFAULT NULL")
+  list = append(list, "[mod_time] datetime DEFAULT NULL")
+  list = append(list, "[mod_user] int(11) DEFAULT NULL")
+  list = append(list, "[lock_time] datetime DEFAULT NULL")
+  list = append(list, "[lock_user] int(11) DEFAULT NULL")
+  list = append(list, "[print_time] datetime DEFAULT NULL")
+  list = append(list, "[print_user] int(11) DEFAULT NULL")
+
+  return list
+}
+
 // GetTables assign table list to MsSql Tables slice
-func (ms *MsSql) GetTables() error {
-  return DBs.Preload("Propert").Preload("Keys").Order("table").Find(&ms.Tables).Error
+func (ms *MsSql) GetTables() ([]Table, error) {
+  var tableList []Table
+
+  err := ms.DB.Preload("Propert").Preload("Keys").Order("table").Find(&tableList).Error
+
+  return tableList, err
 }
 
 func (ms *MsSql) CreateTables(tables []Table) error {

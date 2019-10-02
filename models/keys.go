@@ -15,13 +15,13 @@ func (Key) TableName() string {
   return "keys"
 }
 
+// Name return field name in lowercase
 func (k *Key) Name() string {
   return strings.TrimSpace(strings.ToLower(k.Field))
 }
 
-func (k *Key) AddIndex(table string) error {
-  name := k.Name()
-  query := fmt.Sprintf("ALTER TABLE `%s` ADD KEY IF NOT EXISTS `%s` (`%s`)", table, name, name)
-
-  return DBy.Exec(query).Error
+// AddIndex create index for table
+func (k *Key) AddIndex(drv Driver, table string) error {
+  return drv.GetDB().Exec(fmt.Sprintf(drv.AddIndexTpl(),
+            table, k.Name(), k.Name())).Error
 }
