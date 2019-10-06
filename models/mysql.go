@@ -54,7 +54,7 @@ func (my *MySql) Close() {
 }
 
 func (my *MySql) CreateTableTpl() string {
-  return "CREATE TABLE IF NOT EXISTS `%s` (\n%s\n) ENGINE=InnoDB DEFAULT CHARSET=cp1257 COLLATE=cp1257_lithuanian_ci;"
+  return "CREATE TABLE IF NOT EXISTS `%s` (\n%s\n) ENGINE=InnoDB ROW_FORMAT=COMPRESSED DEFAULT CHARSET=cp1257 COLLATE=cp1257_lithuanian_ci;"
 }
 
 func (my *MySql) AddIndexTpl() string {
