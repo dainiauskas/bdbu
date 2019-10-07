@@ -1,5 +1,15 @@
 # BDBU - Bûtent DB Utilities
 
+## Versijos
+
+-   [1.1.0]
+
+    -   [+] Kopijavimas vienos lentelës su parametru --table
+
+    -   [- ] Panaikintas string tipo laukams trim funkcionalumas
+
+-   [1.0.0] Pirminë versija, kopijuoja visas lenteles
+
 ## Konfigravimas
 
 -   Source - nurodoma ið kokios duomenø bazës bus kopijuojama
@@ -9,39 +19,27 @@
 ## Komandos
 
 Pagalbos iðkvietimas:
+
 ```cmd
 bdbu help
 ```
 
 Versijos parodymas:
+
 ```cmd
 bdbu version
 ```
 
 Duomenø kopijavimas vykdomas:
+
 ```cmd
 bdbu copy
 ```
 
-> Pastaba: Ávykus bet kokiai klaidai kopijavimo procesas ið karto sustabdomas ir á ekranà iðvedamas klaidos praneðimas.
-
-## Paleidimas
-
-Paleidus programà be jokiø parametrø bus iðkviesta pagalba
+arba vienai lentelei kopijuoti:
 
 ```cmd
-Usage:
-  bdbu [command]
-
-Available Commands:
-  copy        copy database to another
-  help        Help about any command
-  version     Print the version number
-
-Flags:
-      --config string   config file (default is bdbu.yaml)
-  -h, --help            help for bdbu
-  -v, --verbose         verbose output
-
-Use "bdbu [command] --help" for more information about a command.
+bdbu copy --table klientai
 ```
+
+> Pastaba: Ávykus bet kokiai klaidai kopijavimo procesas ið karto sustabdomas ir á ekranà iðvedamas klaidos praneðimas.
