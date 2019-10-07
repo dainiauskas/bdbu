@@ -1,0 +1,17 @@
+source:
+  dialect: mssql
+  host: server2012
+  instance: butent
+  name: db_name
+  user: user_name
+  pass: user_password
+
+destination:
+  dialect: mysql
+  host: localhost
+  port: 3306
+  name: db_name
+  user: user_name
+  pass: user_password
+  params:
+    charset: utf8
