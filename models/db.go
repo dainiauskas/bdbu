@@ -39,7 +39,7 @@ func Register(name string, driver Driver) {
 }
 
 // open connect to one database by drivers and return Driver interface
-func open(config *config.Database, where string) Driver {
+func Open(config *config.Database, where string) Driver {
   drv := drivers[config.Dialect + "-" + where]
   drv.Open(config.FormatDSN())
 
@@ -49,8 +49,8 @@ func open(config *config.Database, where string) Driver {
 // Connect open connection to databases by configuration, return DB structure
 func Connect(srcConfig, dstConfig *config.Database) *DB {
   return &DB{
-    Src: open(srcConfig, "src"),
-    Dst: open(dstConfig, "dst"),
+    Src: Open(srcConfig, "src"),
+    Dst: Open(dstConfig, "dst"),
   }
 }
 
