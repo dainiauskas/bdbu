@@ -2,7 +2,7 @@ package models
 
 import (
   "fmt"
-  "strings"
+  // "strings"
 
   "github.com/jinzhu/gorm"
   "github.com/cheggaaa/pb/v3"
@@ -128,13 +128,6 @@ func (db *DB) migrateTable(table *Table) *DB {
       panic(err)
     }
 
-    for i, v := range r {
-      switch v.(type) {
-      case string:
-        r[i] = strings.TrimSpace(v.(string))
-      }
-    }
-
     if err := tx.Exec(query, r...).Error; err != nil {
       tx.Rollback()
       fmt.Println(name, err)
@@ -149,11 +142,16 @@ func (db *DB) migrateTable(table *Table) *DB {
 
 // GetTableList select list from table [tables] and preload data from tables
 // [propert] and [keys]
-func (db *DB) GetTableList() []Table {
+func (db *DB) GetTableList(tableName string) []Table {
   var tableList []Table
 
-  err := db.Src.GetDB().Preload("Propert").Preload("Keys").
-            Order("table").Find(&tableList).Error
+  qr := db.Src.GetDB().Preload("Propert").Preload("Keys")
+
+  if tableName != "" {
+    qr = qr.Where(map[string]interface{}{"table": tableName})
+  }
+
+  err := qr.Order("table").Find(&tableList).Error
 
   if err != nil {
     panic(err)
@@ -163,11 +161,11 @@ func (db *DB) GetTableList() []Table {
 }
 
 // CreateTables create tables by []Table list on destination
-func (db *DB) Migrate() {
+func (db *DB) Migrate(tableName string) {
   db.Src.SetParams()
   db.Dst.SetParams()
 
-  tables := db.GetTableList()
+  tables := db.GetTableList(tableName)
 
   for _, table := range tables {
     db.migrateTable(&table)

@@ -21,12 +21,12 @@ func NewDuration() *duration {
   }
 }
 
-func Copy() {
+func Copy(tableName string) {
   d := NewDuration()
   defer d.Completed()
 
   db := models.Connect(Config.Source, Config.Destination)
   defer db.Close()
 
-  db.Migrate()
+  db.Migrate(tableName)
 }
