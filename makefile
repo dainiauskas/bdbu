@@ -11,7 +11,7 @@ BINARY := $(GOBIN)/${PROJECTNAME}
 # Use linker flags to provide version/build settings
 LDFLAGS=-ldflags "-s -X $(PROJECTNAME)/cmd.Version=$(VERSION) -X $(PROJECTNAME)/cmd.Build=$(BUILD) -X $(PROJECTNAME)/cmd.Name=$(NAME)"
 
-all: before linux win386 win64 clean
+all: before linux win386 win64 clean source
 
 before:
 	cp $(PROJECTNAME).example.yaml $(GOBIN)/$(PROJECTNAME).yaml
@@ -30,6 +30,9 @@ win386:
 	GOOS=windows GOARCH=386 go build -tags release $(LDFLAGS) -o $(BINARY).exe
 	upx-ucl $(BINARY).exe
 	zip -j $(BINARY)_$(VERSION)_win_386.zip $(BINARY).exe $(GOBIN)/$(PROJECTNAME).yaml README.md
+
+source:
+	zip $(BINARY)_$(VERSION)_src.zip app/*.go cmd/*.go models/*.go *.example.yaml makefile .gitignore
 
 clean:
 	@-rm $(GOBIN)/$(PROJECTNAME).yaml 2> /dev/null
