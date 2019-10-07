@@ -16,14 +16,6 @@ type MainConfig struct {
   Benchmark   *config.Database
 }
 
-func (c *MainConfig) MsConfig() *config.Database {
-  return c.MsSql
-}
-
-func (c *MainConfig) MyConfig() *config.Database {
-  return c.MySql
-}
-
 func GetConfig() error {
   if err := viper.Unmarshal(&Config); err != nil {
     return err
