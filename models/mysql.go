@@ -10,15 +10,11 @@ import (
 
 type MySql struct {
   DB      *gorm.DB
-  Tables  []Table
 }
 
-var DBy   *gorm.DB
-var Mytx  *gorm.DB
-
 func init() {
-  my := &MySql{}
-  Register("mysql", my)
+  Register("mysql-src", &MySql{})
+  Register("mysql-dst", &MySql{})
 }
 
 // Set parameters before migration
@@ -36,9 +32,6 @@ func (my *MySql) Open(url string) {
 
   db.LogMode(false)
 
-  DBs = db
-  Mytx = db.Begin()
-
   my.DB = db
 }
 
@@ -48,7 +41,6 @@ func (my *MySql) GetDB() *gorm.DB {
 
 // Close connection of MySql database
 func (my *MySql) Close() {
-  Mytx.Commit()
   my.DB.Close()
   fmt.Println("MySql disconnected")
 }

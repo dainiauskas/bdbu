@@ -11,14 +11,13 @@ import (
 
 type MsSql struct {
   DB      *gorm.DB
-  Tables  []Table
 }
 
 var DBs *gorm.DB
 
 func init() {
-  ms := &MsSql{}
-  Register("mssql", ms)
+  Register("mssql-src", &MsSql{})
+  Register("mssql-dst", &MsSql{})
 }
 
 // Set parameters before migration
@@ -119,9 +118,9 @@ func (ms *MsSql) CreateTables(tables []Table) error {
   return nil
 }
 
-func (ms *MsSql) TableList() []Table {
-  return ms.Tables
-}
+// func (ms *MsSql) TableList() []Table {
+//   return ms.Tables
+// }
 
 // TableRows return rows from table
 func (ms *MsSql) TableRows(name string) (int, *sql.Rows, error) {
