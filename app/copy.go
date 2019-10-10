@@ -11,8 +11,8 @@ type duration struct {
   Start time.Time
 }
 
-func (d *duration) Completed() {
-  fmt.Printf("Completed in %v\n", time.Now().Sub(d.Start))
+func (d *duration) Completed(tpl string) {
+  fmt.Printf(tpl, time.Now().Sub(d.Start))
 }
 
 func NewDuration() *duration {
@@ -23,7 +23,7 @@ func NewDuration() *duration {
 
 func Copy(tableName string) {
   d := NewDuration()
-  defer d.Completed()
+  defer d.Completed("Completed in %v\n")
 
   db := models.Connect(Config.Source, Config.Destination)
   defer db.Close()
