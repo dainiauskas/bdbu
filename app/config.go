@@ -11,18 +11,9 @@ type Configuration interface {
 
 type MainConfig struct {
   config.App
-  MsSql       *config.Database
-  MySql       *config.Database
   Source      *config.Database
   Destination *config.Database
-}
-
-func (c *MainConfig) MsConfig() *config.Database {
-  return c.MsSql
-}
-
-func (c *MainConfig) MyConfig() *config.Database {
-  return c.MySql
+  Benchmark   *config.Database
 }
 
 func GetConfig() error {
