@@ -6,5 +6,5 @@ import (
 )
 
 func Tuner() {
-  tuner.Start(models.Open(Config.Source, "src"))
+  tuner.Start(models.Open(Config.Benchmark, "dst"))
 }

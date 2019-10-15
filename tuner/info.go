@@ -20,7 +20,7 @@ func init() {
 }
 
 func outHeader(msg string) {
-  color.Notice.Println(strings.ToUpper(msg))
+  color.Notice.Println(strings.ToUpper("\n" + msg))
 }
 
 func outInfo(args ...interface{}) {
@@ -32,7 +32,11 @@ func outInfoF(msg string, args ...interface{}) {
 }
 
 func outError(msg ...interface{}) {
-  color.Info.Println(msg...)
+  color.Error.Println(msg...)
+}
+
+func outErrorF(msg string, args ...interface{}) {
+  color.Error.Printf(msg, args...)
 }
 
 func outInfoTips(msg string, args ...interface {}) {
@@ -41,6 +45,10 @@ func outInfoTips(msg string, args ...interface {}) {
 
 func outWarnTips(msg string, args ...interface {}) {
   color.Warn.Tips(msg, args...)
+}
+
+func outNoticeTips(msg string, args ...interface {}) {
+  color.Notice.Tips(msg, args...)
 }
 
 func outColInfo(hdr int, arg interface{}) {
