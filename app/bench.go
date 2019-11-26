@@ -35,10 +35,14 @@ type TableBench struct {
 }
 
 func (TableBench) TableName() string {
-  return "bench_table"
+  return "temp_bench_table"
 }
 
 func Benchmark(records int, engine, rowFormat string) {
+  if (!Config.IsBenchmark()) {
+    return
+  }
+
   drv := models.Open(Config.Benchmark, "src")
   defer drv.Close()
 

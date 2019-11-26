@@ -3,6 +3,7 @@ package app
 import (
   "butent/api/config"
   "github.com/spf13/viper"
+  "github.com/gookit/color"
 )
 
 type Configuration interface {
@@ -25,3 +26,12 @@ func GetConfig() error {
 }
 
 var Config  *MainConfig
+
+func (mc *MainConfig) IsBenchmark() bool {
+  if (Config.Benchmark == nil) {
+    color.Red.Println("Please configure Benchmark section")
+    return false
+  }
+
+  return true
+}

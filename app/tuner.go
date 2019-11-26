@@ -6,5 +6,7 @@ import (
 )
 
 func Tuner() {
-  tuner.Start(models.Open(Config.Benchmark, "dst"))
+  if (Config.IsBenchmark()) {
+    tuner.Start(models.Open(Config.Benchmark, "dst"))
+  }
 }
