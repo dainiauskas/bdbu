@@ -35,3 +35,12 @@ func (mc *MainConfig) IsBenchmark() bool {
 
   return true
 }
+
+func (mc *MainConfig) IsConfigured() bool {
+  if (Config.Source == nil || Config.Destination == nil) {
+    color.Red.Println("Please configure source and destination sections")
+    return false
+  }
+
+  return true
+}
