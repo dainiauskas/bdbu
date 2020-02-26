@@ -2,11 +2,16 @@
 
 ## Versijos
 
+-   [1.2.2]
+
+    -   [+] Konfigûracijos klaidø praneðimai
+
 -   [1.2.1]
+
     -   [+] Benchmark option
 
     -   [+] Tuner option
-    
+
     -   [+] MySQL Option decoder
 
 
