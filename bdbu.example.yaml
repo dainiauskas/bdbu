@@ -15,3 +15,12 @@ destination:
   pass: user_password
   params:
     charset: utf8
+
+benchmark:
+  dialect: mysql
+  host: localhost
+  port: 3306
+  name: db_name
+  user: user_name
+  pass: user_password
+  
