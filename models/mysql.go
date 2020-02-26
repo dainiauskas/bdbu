@@ -112,7 +112,7 @@ func (my *MySql) GetTables() ([]Table, error) {
 
 func (my *MySql) CreateIndexes(t *Table) error {
 	for _, key := range t.Keys {
-		if key.Field != t.RecordId {
+		if key.Field != t.RecordID {
 			q := fmt.Sprintf("ALTER TABLE `%s` ADD KEY IF NOT EXISTS `%s` (`%s`);",
 				t.GetName(), key.Field, key.Field)
 
