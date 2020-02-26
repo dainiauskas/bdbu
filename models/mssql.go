@@ -144,3 +144,13 @@ func (ms *MsSql) InsertSql(table string, columns []string, args []string) string
 	return fmt.Sprintf("INSERT INTO [%s] (%s) VALUES (%s)", table,
 		strings.Join(columns, ","), strings.Join(args, ","))
 }
+
+// TableNotExists check if table exist in database or not
+func (ms *MsSql) TableNotExists(table string) bool {
+	q := fmt.Sprintf("SELECT 1 FROM %s LIMIT 1", table)
+	if err := ms.DB.Exec(q).Error; err != nil {
+		return true
+	}
+
+	return false
+}
