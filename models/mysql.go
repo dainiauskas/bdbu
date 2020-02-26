@@ -17,11 +17,12 @@ func init() {
 	Register("mysql-dst", &MySql{})
 }
 
-// Set parameters before migration
+// SetParams set parameters before migration
 func (my *MySql) SetParams() {
 	my.DB.Exec("SET @@sql_mode='';")
 }
 
+// Open connect to database and and assign to DB
 func (my *MySql) Open(url string) {
 	db, err := gorm.Open("mysql", url)
 	if err != nil {
@@ -35,6 +36,7 @@ func (my *MySql) Open(url string) {
 	my.DB = db
 }
 
+// GetDB return gorm DB
 func (my *MySql) GetDB() *gorm.DB {
 	return my.DB
 }
@@ -45,10 +47,12 @@ func (my *MySql) Close() {
 	fmt.Println("MySql disconnected")
 }
 
+// CreateTableTpl return create table string
 func (my *MySql) CreateTableTpl() string {
 	return "CREATE TABLE IF NOT EXISTS `%s` (\n%s\n) ENGINE=InnoDB DEFAULT CHARSET=cp1257 COLLATE=cp1257_lithuanian_ci;"
 }
 
+// AddIndexTpl return alter table string
 func (my *MySql) AddIndexTpl() string {
 	return "ALTER TABLE `%s` ADD KEY IF NOT EXISTS `%s` (`%s`)"
 }
@@ -138,9 +142,12 @@ func (my *MySql) InsertSql(table string, columns []string, args []string) string
 func (my *MySql) TableNotExists(table string) bool {
 	q := fmt.Sprintf("SELECT 1 FROM %s LIMIT 1", table)
 	if err := my.DB.Exec(q).Error; err != nil {
-		fmt.Println(err)
 		return true
 	}
 
 	return false
+}
+
+func (my *MySql) Truncate(table string) {
+	my.DB.Exec(fmt.Sprintf("TRUNCATE TABLE %s", my.Quote(table)))
 }

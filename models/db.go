@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/jinzhu/gorm"
@@ -10,7 +11,9 @@ import (
 )
 
 var (
-	drivers = make(map[string]Driver)
+	drivers  = make(map[string]Driver)
+	stock    = "BŪTENT"
+	allUsers = strings.Repeat("*", 100)
 )
 
 // Driver interface to use databases
@@ -27,6 +30,7 @@ type Driver interface {
 	Quote(string) string
 	InsertSql(string, []string, []string) string
 	TableNotExists(string) bool
+	Truncate(string)
 }
 
 // Register drivers
@@ -82,11 +86,14 @@ func (db *DB) recreateTable(table *Table, bar *pb.ProgressBar) {
 }
 
 // ceateTable creating table by Table information
-func (db *DB) migrateTable(table *Table) *DB {
+func (db *DB) migrateTable(table *Table, empty bool) *DB {
 	name := table.GetName()
 	tmpl := `[{{string . "table_name"}}] [{{string . "action"}}] {{ bar .}} {{counters .}} {{etime .}} {{percent .}}`
 
 	count := table.CountRecords(db.Src)
+	if empty && table.CanByEmpty() {
+		count = 0
+	}
 
 	// start bar based on our template
 	bar := pb.ProgressBarTemplate(tmpl).Start(count)
@@ -163,9 +170,11 @@ func (db *DB) GetTableList(tableName string) []Table {
 }
 
 // Migrate function to migrate tables from source to destination
-func (db *DB) Migrate(tableName string, dropTables bool) {
+func (db *DB) Migrate(tableName string, dropTables, empty bool) {
 	db.Src.SetParams()
 	db.Dst.SetParams()
+
+	// db.Dst.CreateDatabase()
 
 	tables := db.GetTableList(tableName)
 
@@ -174,13 +183,146 @@ func (db *DB) Migrate(tableName string, dropTables bool) {
 		name := table.GetName()
 
 		if !dropTables {
-			ok = db.Src.TableNotExists(name)
+			ok = db.Dst.TableNotExists(name)
 		}
 
 		if ok {
-			db.migrateTable(&table)
+			db.migrateTable(&table, empty)
 		} else {
-			fmt.Printf("Skipping table: %s\n", name)
+			fmt.Printf("Skipping table: %s. Exist in database!!!\n", name)
 		}
 	}
+
+	if empty {
+		db.setDefaults()
+	}
+}
+
+func (db *DB) truncateTable(table string) {
+	db.Dst.Truncate(table)
+}
+
+func (db *DB) truncateTables(tables ...string) {
+	for _, table := range tables {
+		db.truncateTable(table)
+	}
+}
+
+func (db *DB) dstDB() *gorm.DB {
+	return db.Dst.GetDB()
+}
+
+func (db *DB) srcDB() *gorm.DB {
+	return db.Src.GetDB()
+}
+
+func (db *DB) createClient() {
+	client := struct {
+		Klientas  string
+		Salis     string
+		Pazymetas string
+		Tiekejas  int
+		Gavejas   int
+		KlientID  int
+		UsedTag   int
+	}{
+		Klientas:  stock,
+		Salis:     "Lietuvos Respublika",
+		Pazymetas: allUsers,
+		Tiekejas:  1,
+		Gavejas:   1,
+		KlientID:  1,
+		UsedTag:   1,
+	}
+
+	db.create("klientai", &client)
+}
+
+func (db *DB) createWarehouse() {
+	wh := struct {
+		Sandelis  string
+		Pazymetas string
+		IslKiekis string
+		IslData   string
+		UTMode    string `gorm:"column:u_t_mode"`
+		SandID    int
+		UsedTag   int
+		ForeColor int
+		BackColor int
+		Visible   string
+	}{
+		Sandelis:  "S1",
+		Pazymetas: allUsers,
+		IslKiekis: ">",
+		IslData:   "<=",
+		UTMode:    "*",
+		SandID:    1,
+		UsedTag:   1,
+		ForeColor: -1,
+		BackColor: -1,
+		Visible:   allUsers,
+	}
+
+	db.create("sand", &wh)
+}
+
+func (db *DB) createType() {
+	types := struct {
+		Tipas     string
+		Pazymetas string
+		ForeColor int
+		BackColor int
+		UsedTag   int
+		Visible   string
+		TipID     int
+	}{
+		Tipas:     "Paslaugos",
+		Pazymetas: allUsers,
+		ForeColor: -1,
+		BackColor: -1,
+		UsedTag:   1,
+		Visible:   allUsers,
+		TipID:     1,
+	}
+
+	db.create("tipai", &types)
+}
+
+func (db *DB) createGroup() {
+	groups := struct {
+		Grupe     string
+		Pazymetas string
+		ForeColor int
+		BackColor int
+		UsedTag   int
+		Visible   string
+		GrupID    int
+	}{
+		Grupe:     "Gaunamos paslaugos",
+		Pazymetas: allUsers,
+		ForeColor: -1,
+		BackColor: -1,
+		UsedTag:   1,
+		Visible:   allUsers,
+		GrupID:    1,
+	}
+
+	db.create("grupes", &groups)
+}
+
+func (db *DB) setDefaults() {
+	src := db.Dst.GetDB()
+	src.Table("peln_pas").Updates(map[string]interface{}{"suma": 0, "suma_buvo": 0})
+	src.Table("adm_par").Update("firma", stock)
+
+	db.truncateTables("klientai", "sand", "tipai", "grupes")
+
+	db.createClient()
+	db.createWarehouse()
+	db.createType()
+	db.createGroup()
+}
+
+func (db *DB) create(table string, data interface{}) {
+	db.dstDB().Table(table).Create(data)
 }

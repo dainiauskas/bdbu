@@ -5,7 +5,7 @@ import (
 )
 
 // Copy start database migration from source to destination
-func Copy(tableName string, dropTables bool) {
+func Copy(tableName string, dropTables, empty bool) {
 	if !Config.IsConfigured() {
 		return
 	}
@@ -16,5 +16,5 @@ func Copy(tableName string, dropTables bool) {
 	db := models.Connect(Config.Source, Config.Destination)
 	defer db.Close()
 
-	db.Migrate(tableName, dropTables)
+	db.Migrate(tableName, dropTables, empty)
 }

@@ -154,3 +154,7 @@ func (ms *MsSql) TableNotExists(table string) bool {
 
 	return false
 }
+
+func (ms *MsSql) Truncate(table string) {
+	ms.DB.Exec(fmt.Sprintf("TRUNCATE TABLE %s", ms.Quote(table)))
+}
