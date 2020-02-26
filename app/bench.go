@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	tplRecords = "Test records  : %d\n"
-	tplCreate  = "Creating table: %v\n"
-	tplInsert  = "Inserting     : %v\n"
-	tplSelect  = "Selecting     : %v\n"
-	tplDelete  = "Deleting      : %v\n"
-	tplDrop    = "Droping       : %v\n"
+	tplRecords = "Test records   : %d\n"
+	tplCreate  = "Creating table : %v\n"
+	tplInsert  = "Inserting      : %v\n"
+	tplSelect  = "Selecting      : %v\n"
+	tplDelete  = "Deleting       : %v\n"
+	tplDrop    = "Droping        : %v\n"
 
 	sqlGetInfo = `engine, row_format,
     round(((data_length + index_length) / 1024 / 1024), 2) As size`
