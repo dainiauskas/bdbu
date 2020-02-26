@@ -1,6 +1,10 @@
 # BDBU - Bûtent DB Utilities
 
 ## Versijos
+-   [1.2.3]
+  - [+]  Ádëta apsauga nuo netyèinio duomenø kopijavimo.
+         Naudojant copy funkcijà ir norint, kad bûtø perraðytos lentelës bûtina
+         nurodyti parametrà -D arba --with-drop
 
 -   [1.2.2]
 
@@ -53,6 +57,12 @@ arba vienai lentelei kopijuoti:
 
 ```cmd
 bdbu copy --table klientai
+```
+
+norint perraðyti lentelæ:
+
+```cmd
+bdbu copy --table klientai -D
 ```
 
 > Pastaba: Ávykus bet kokiai klaidai kopijavimo procesas ið karto sustabdomas ir á ekranà iðvedamas klaidos praneðimas.

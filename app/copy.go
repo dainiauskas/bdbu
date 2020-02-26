@@ -4,7 +4,8 @@ import (
 	"bdbu/models"
 )
 
-func Copy(tableName string) {
+// Copy start database migration from source to destination
+func Copy(tableName string, dropTables bool) {
 	if !Config.IsConfigured() {
 		return
 	}
@@ -15,5 +16,5 @@ func Copy(tableName string) {
 	db := models.Connect(Config.Source, Config.Destination)
 	defer db.Close()
 
-	db.Migrate(tableName)
+	db.Migrate(tableName, dropTables)
 }

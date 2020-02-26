@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	// "strings"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/jinzhu/gorm"
@@ -14,6 +13,7 @@ var (
 	drivers = make(map[string]Driver)
 )
 
+// Driver interface to use databases
 type Driver interface {
 	Open(url string)
 	Close()
@@ -26,8 +26,10 @@ type Driver interface {
 	SetParams()
 	Quote(string) string
 	InsertSql(string, []string, []string) string
+	TableNotExists(string) bool
 }
 
+// Register drivers
 func Register(name string, driver Driver) {
 	if driver == nil {
 		panic("sql: Register driver is nil")
@@ -38,7 +40,7 @@ func Register(name string, driver Driver) {
 	drivers[name] = driver
 }
 
-// open connect to one database by drivers and return Driver interface
+// Open connect to one database by drivers and return Driver interface
 func Open(config *config.Database, where string) Driver {
 	drv := drivers[config.Dialect+"-"+where]
 	drv.Open(config.FormatDSN())
@@ -160,14 +162,25 @@ func (db *DB) GetTableList(tableName string) []Table {
 	return tableList
 }
 
-// CreateTables create tables by []Table list on destination
-func (db *DB) Migrate(tableName string) {
+// Migrate function to migrate tables from source to destination
+func (db *DB) Migrate(tableName string, dropTables bool) {
 	db.Src.SetParams()
 	db.Dst.SetParams()
 
 	tables := db.GetTableList(tableName)
 
 	for _, table := range tables {
-		db.migrateTable(&table)
+		ok := true
+		name := table.GetName()
+
+		if !dropTables {
+			ok = db.Src.TableNotExists(name)
+		}
+
+		if ok {
+			db.migrateTable(&table)
+		} else {
+			fmt.Printf("Skipping table: %s\n", name)
+		}
 	}
 }
