@@ -1,10 +1,12 @@
 # BDBU - Bûtent DB Utilities
 
 ## Versijos
--   [1.2.3]
+-   [1.3.0]
   - [+]  Ádëta apsauga nuo netyèinio duomenø kopijavimo.
          Naudojant copy funkcijà ir norint, kad bûtø perraðytos lentelës bûtina
          nurodyti parametrà -D arba --with-drop
+  - [+]  Su parametru -e arba --empty kopijuojamos tuðèios lentelës, iðskyrus
+         Bûtent programos sistemines lenteles.
 
 -   [1.2.2]
 
