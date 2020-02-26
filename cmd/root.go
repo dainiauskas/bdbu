@@ -1,61 +1,61 @@
 package cmd
 
 import (
-  "strings"
-  "os"
-  "path/filepath"
+	"os"
+	"path/filepath"
+	"strings"
 
-  "github.com/spf13/cobra"
-  "github.com/spf13/viper"
-  "butent/tools/log"
+	"bitbucket.org/butenta/pkg-log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
-  "bdbu/app"
+	"bdbu/app"
 )
 
 var (
-  Verbose     bool
-  configFile  string
-  AppDir      = workDir()
+	Verbose    bool
+	configFile string
+	AppDir     = workDir()
 )
 
 var rootCmd = &cobra.Command{
-	Use: strings.ToLower(Name),
+	Use:   strings.ToLower(Name),
 	Short: Name,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-    log.SetLogTrace(Verbose || app.Config.Verbose)
-    log.SetLogToConsole(app.Config.Console)
+		log.SetLogTrace(Verbose || app.Config.Verbose)
+		log.SetLogToConsole(app.Config.Console)
 	},
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Warn("%s", err)
-    return
+		return
 	}
 }
 
 func workDir() string {
-  ex, err := os.Executable()
-  if err != nil {
-    panic(err)
-  }
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
 
-  return filepath.Dir(ex)
+	return filepath.Dir(ex)
 }
 
 func init() {
-  if _, err := os.Stat("bdbu.yaml"); os.IsNotExist(err) {
-    if err := os.Chdir(AppDir); err != nil {
-      panic(err)
-    }
-  }
+	if _, err := os.Stat("bdbu.yaml"); os.IsNotExist(err) {
+		if err := os.Chdir(AppDir); err != nil {
+			panic(err)
+		}
+	}
 
-  log.Init("./log", 400, 20, 100, true)
+	log.Init("./log", 400, 20, 100, true)
 
-  log.SetFilenamePrefix("", "")
-  log.SetLogThrough(false)
-  log.SetLogFunctionName(false)
-  log.SetLogFilenameLineNum(false)
+	log.SetFilenamePrefix("", "")
+	log.SetLogThrough(false)
+	log.SetLogFunctionName(false)
+	log.SetLogFilenameLineNum(false)
 
 	cobra.OnInitialize(initConfig)
 
@@ -75,10 +75,10 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-    panic(err)
+		panic(err)
 	}
 
-  if err := app.GetConfig(); err != nil {
-    panic(err)
-  }  
+	if err := app.GetConfig(); err != nil {
+		panic(err)
+	}
 }
