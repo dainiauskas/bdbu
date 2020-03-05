@@ -18,6 +18,7 @@ const (
     round(((data_length + index_length) / 1024 / 1024), 2) As size`
 )
 
+// InfoSchema structure for reading information schema tables
 type InfoSchema struct {
 	Engine      string  `gorm:"column:ENGINE"`
 	RowFormat   string  `gorm:"column:ROW_FORMAT"`
@@ -25,15 +26,18 @@ type InfoSchema struct {
 	IndexLength float64 `gorm:"column:INDEX_LENGTH"`
 }
 
+// TableName return information schema tables name
 func (InfoSchema) TableName() string {
 	return "information_schema.TABLES"
 }
 
+// TableBench used for create table to benchmark tests
 type TableBench struct {
-	Id uint `gorm:"primary_key"`
+	ID uint `gorm:"primary_key"`
 	// Str   string    `gorm:"type:char(10);default:''"`
 }
 
+// TableName return name of table
 func (TableBench) TableName() string {
 	return "temp_bench_table"
 }
