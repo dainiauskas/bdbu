@@ -3,6 +3,7 @@ package app
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 )
@@ -15,12 +16,12 @@ type diskSize struct {
 }
 
 func (ds *diskSize) writeFile() error {
-	fName := `/tmp/diskio` // test file
-	defer os.Remove(fName)
-	f, err := os.Create(fName)
+	f, err := ioutil.TempFile("", "*")
 	if err != nil {
 		return err
 	}
+	defer os.Remove(f.Name())
+
 	const defaultBufSize = 4096
 	buf := make([]byte, defaultBufSize)
 	buf[len(buf)-1] = '\n'
