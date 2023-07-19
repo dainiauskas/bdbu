@@ -82,7 +82,7 @@ func (my *MySql) dbfToSqlType(p *Propert, primaryKey, relKey string) string {
 	case "N":
 		return fmt.Sprintf("DECIMAL(%d,%d) %s", p.Size, p.Decimals, null)
 	case "M":
-		return fmt.Sprintf("TEXT")
+		return fmt.Sprintf("LONGTEXT")
 	case "D":
 		return fmt.Sprintf("DATE %s", null)
 	case "T":

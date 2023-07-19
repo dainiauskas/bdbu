@@ -3,4 +3,7 @@ bdbu.yaml
 bdbu
 *.exe
 log
+*.log
 testbase
+.vscode
+*.sql

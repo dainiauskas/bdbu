@@ -18,17 +18,18 @@ before:
 
 linux:
 	GOOS=linux go build -tags release $(LDFLAGS) -o $(BINARY)
-	upx-ucl $(BINARY)
+	upx $(BINARY)
 	zip -j $(BINARY)_$(VERSION)_linux.zip $(BINARY) $(GOBIN)/$(PROJECTNAME).yaml README.md
 
 win64:
 	GOOS=windows go build -tags release $(LDFLAGS) -o $(BINARY).exe
-	upx-ucl $(BINARY).exe
+	upx $(BINARY).exe --brute
 	zip -j $(BINARY)_$(VERSION)_win.zip $(BINARY).exe $(GOBIN)/$(PROJECTNAME).yaml README.md
 
 win386:
-	GOOS=windows GOARCH=386 go build -tags release $(LDFLAGS) -o $(BINARY).exe
-	upx-ucl $(BINARY).exe
+	GOOS=windows 
+	 go build -tags release $(LDFLAGS) -o $(BINARY).exe
+	upx $(BINARY).exe
 	zip -j $(BINARY)_$(VERSION)_win_386.zip $(BINARY).exe $(GOBIN)/$(PROJECTNAME).yaml README.md
 
 source:

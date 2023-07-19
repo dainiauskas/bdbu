@@ -1,7 +1,7 @@
 package app
 
 import (
-  "fmt"
+	"fmt"
 )
 
 const (
@@ -78,7 +78,7 @@ var (
 func init() {
   var maxLength = 0
 
-  for k, _ := range options {
+  for k := range options {
     if maxLength < len(k) {
       maxLength = len(k)
     }
